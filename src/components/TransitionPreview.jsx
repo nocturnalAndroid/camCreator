@@ -38,9 +38,11 @@ export default function TransitionPreview({ params, image }) {
       <div>
         <h3>Transition preview · F·F·T·T·F·T·F·F·T·F</h3>
         <svg viewBox={`${-v} ${-v} ${v * 2} ${v * 2}`} style={{ width: '100%', maxWidth: 280, display: 'block' }}>
-          <circle cx={0} cy={0} r={ro} fill="none" stroke="#ddd" strokeWidth={sw} strokeDasharray={`${ro * 0.05} ${ro * 0.03}`} />
-          <circle cx={0} cy={0} r={ri} fill="none" stroke="#ddd" strokeWidth={sw} strokeDasharray={`${ro * 0.05} ${ro * 0.03}`} />
-          <path d={path} fill="rgba(100,160,255,0.15)" stroke="navy" strokeWidth={sw * 1.5} />
+          <g transform="rotate(-90)">
+            <circle cx={0} cy={0} r={ro} fill="none" stroke="#ddd" strokeWidth={sw} strokeDasharray={`${ro * 0.05} ${ro * 0.03}`} />
+            <circle cx={0} cy={0} r={ri} fill="none" stroke="#ddd" strokeWidth={sw} strokeDasharray={`${ro * 0.05} ${ro * 0.03}`} />
+            <path d={path} fill="rgba(100,160,255,0.15)" stroke="navy" strokeWidth={sw * 1.5} />
+          </g>
         </svg>
       </div>
     )
@@ -73,24 +75,23 @@ export default function TransitionPreview({ params, image }) {
   return (
     <div>
       <h3>Transition preview · F·F·T·T·F·T·F·F·T·F · {10}/{totalCols} cols</h3>
-      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} style={{ width: '100%', maxWidth: 480, display: 'block' }}>
-        <defs>
-          <clipPath id="tp-sector">
-            <path d={clipD} />
-          </clipPath>
-        </defs>
-        {/* Full guide circles for context */}
-        <circle cx={0} cy={0} r={ro} fill="none" stroke="#eee" strokeWidth={sw} clipPath="url(#tp-sector)" />
-        <circle cx={0} cy={0} r={ri} fill="none" stroke="#eee" strokeWidth={sw} clipPath="url(#tp-sector)" />
-        {/* Cam profile clipped to sector */}
-        <g clipPath="url(#tp-sector)">
-          <path d={path} fill="rgba(100,160,255,0.2)" stroke="navy" strokeWidth={sw * 1.5} />
+      <svg viewBox={`${vy} ${-vx - vw} ${vh} ${vw}`} style={{ width: '100%', maxWidth: 480, display: 'block' }}>
+        <g transform="rotate(-90)">
+          <defs>
+            <clipPath id="tp-sector">
+              <path d={clipD} />
+            </clipPath>
+          </defs>
+          <circle cx={0} cy={0} r={ro} fill="none" stroke="#eee" strokeWidth={sw} clipPath="url(#tp-sector)" />
+          <circle cx={0} cy={0} r={ri} fill="none" stroke="#eee" strokeWidth={sw} clipPath="url(#tp-sector)" />
+          <g clipPath="url(#tp-sector)">
+            <path d={path} fill="rgba(100,160,255,0.2)" stroke="navy" strokeWidth={sw * 1.5} />
+          </g>
+          <line x1={ri} y1={0} x2={ro * 1.08} y2={0}
+            stroke="#bbb" strokeWidth={sw} strokeDasharray={`${ro * 0.04} ${ro * 0.025}`} />
+          <line x1={ri * cos} y1={ri * sin} x2={ro * 1.08 * cos} y2={ro * 1.08 * sin}
+            stroke="#bbb" strokeWidth={sw} strokeDasharray={`${ro * 0.04} ${ro * 0.025}`} />
         </g>
-        {/* Radial boundary lines ri → ro */}
-        <line x1={ri} y1={0} x2={ro * 1.08} y2={0}
-          stroke="#bbb" strokeWidth={sw} strokeDasharray={`${ro * 0.04} ${ro * 0.025}`} />
-        <line x1={ri * cos} y1={ri * sin} x2={ro * 1.08 * cos} y2={ro * 1.08 * sin}
-          stroke="#bbb" strokeWidth={sw} strokeDasharray={`${ro * 0.04} ${ro * 0.025}`} />
       </svg>
     </div>
   )
