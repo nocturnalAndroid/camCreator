@@ -128,6 +128,13 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
         </label>
       </>}
 
+      {/* Dither */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <input type="checkbox" checked={params.dither}
+          onChange={e => setParams(p => ({ ...p, dither: e.target.checked }))} />
+        Dither (Floyd–Steinberg)
+      </label>
+
       {/* Black = outer */}
       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <input type="checkbox" checked={params.blackIsOuter}
