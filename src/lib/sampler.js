@@ -9,13 +9,18 @@
  *   blackIsOuter: boolean,
  *   convW: number,
  *   convH: number,
+ *   dither?: boolean,
  * }} params
  * @returns {boolean[][]}
  */
 export function sampleImage(imageData, params) {
   const { data, width, height } = imageData
-  const { rowSpacingPx, colSpacingPx, mode, threshold, blackIsOuter, convW, convH } = params
+  const { rowSpacingPx, colSpacingPx, mode, threshold, blackIsOuter, convW, convH, dither } = params
   if (!rowSpacingPx || rowSpacingPx <= 0 || !colSpacingPx || colSpacingPx <= 0) return []
+
+  if (dither) {
+    return sampleWithDither(imageData, params)
+  }
 
   const rows = []
   for (let y = 0; y < height; y += rowSpacingPx) {
@@ -24,14 +29,62 @@ export function sampleImage(imageData, params) {
       const luminance = mode === 'exact'
         ? getPixelLuminance(data, width, Math.round(x), Math.round(y))
         : getConvLuminance(data, width, height, Math.round(x), Math.round(y), convW, convH)
-      // luminance 0 = black, 1 = white
-      // black pixel: luminance < threshold → isBlack = true
       const isBlack = luminance < threshold
       row.push(blackIsOuter ? isBlack : !isBlack)
     }
     rows.push(row)
   }
   return rows
+}
+
+function sampleWithDither(imageData, params) {
+  const { data, width, height } = imageData
+  const { rowSpacingPx, colSpacingPx, mode, threshold, blackIsOuter, convW, convH } = params
+
+  // Pass 1: collect luminance grid
+  const ys = []
+  for (let y = 0; y < height; y += rowSpacingPx) ys.push(Math.round(y))
+  const xs = []
+  for (let x = 0; x < width; x += colSpacingPx) xs.push(Math.round(x))
+
+  const nRows = ys.length
+  const nCols = xs.length
+
+  // Mutable float grid for error diffusion
+  const grid = []
+  for (let r = 0; r < nRows; r++) {
+    const row = []
+    for (let c = 0; c < nCols; c++) {
+      row.push(
+        mode === 'exact'
+          ? getPixelLuminance(data, width, xs[c], ys[r])
+          : getConvLuminance(data, width, height, xs[c], ys[r], convW, convH)
+      )
+    }
+    grid.push(row)
+  }
+
+  // Pass 2: Floyd-Steinberg in raster order
+  const bools = []
+  for (let r = 0; r < nRows; r++) {
+    const row = []
+    for (let c = 0; c < nCols; c++) {
+      const lum = grid[r][c]
+      const quantized = lum < threshold ? 0 : 1
+      const error = lum - quantized
+
+      // Diffuse error to neighbours
+      if (c + 1 < nCols)                  grid[r][c + 1]     += error * 7 / 16
+      if (r + 1 < nRows && c - 1 >= 0)    grid[r + 1][c - 1] += error * 3 / 16
+      if (r + 1 < nRows)                  grid[r + 1][c]     += error * 5 / 16
+      if (r + 1 < nRows && c + 1 < nCols) grid[r + 1][c + 1] += error * 1 / 16
+
+      const isBlack = quantized === 0
+      row.push(blackIsOuter ? isBlack : !isBlack)
+    }
+    bools.push(row)
+  }
+  return bools
 }
 
 function getPixelLuminance(data, width, x, y) {
