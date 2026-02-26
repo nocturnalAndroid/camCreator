@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import ImageUpload from './components/ImageUpload'
 import ParameterPanel from './components/ParameterPanel'
+import ImagePreview from './components/ImagePreview'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
+import { sampleImage } from './lib/sampler'
 
 const DEFAULT_PARAMS = {
   rowSpacing: 50, rowUnit: 'px',
@@ -22,10 +24,28 @@ export default function App() {
 
   useEffect(() => {
     if (!image) return
-    parseDpi(image.file).then(detectedDpi => {
-      setDpi(detectedDpi)
-    })
+    parseDpi(image.file).then(detectedDpi => setDpi(detectedDpi))
   }, [image])
+
+  function toPixels(value, unit) {
+    if (unit === 'px') return value
+    if (unit === 'cm') return (value / 2.54) * dpi
+    if (unit === 'in') return value * dpi
+    return value
+  }
+
+  const samples = useMemo(() => {
+    if (!image) return null
+    return sampleImage(image.imageData, {
+      rowSpacingPx: toPixels(params.rowSpacing, params.rowUnit),
+      colSpacingPx: toPixels(params.colSpacing, params.colUnit),
+      mode: params.mode,
+      threshold: params.threshold,
+      blackIsOuter: params.blackIsOuter,
+      convW: params.convW,
+      convH: params.convH,
+    })
+  }, [image, params, dpi])
 
   const sizeCm = image ? imageSizeCm(image.width, image.height, dpi) : null
 
@@ -40,6 +60,7 @@ export default function App() {
         </p>
       )}
       {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
+      <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
     </div>
   )
 }
