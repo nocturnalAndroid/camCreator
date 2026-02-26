@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import ImageUpload from './components/ImageUpload'
 import ParameterPanel from './components/ParameterPanel'
 import ImagePreview from './components/ImagePreview'
+import PatternSkeleton from './components/PatternSkeleton'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
 import { sampleImage } from './lib/sampler'
 
@@ -61,6 +62,7 @@ export default function App() {
       )}
       {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
       <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
+      <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
     </div>
   )
 }
