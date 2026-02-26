@@ -22,6 +22,18 @@ const DEFAULT_PARAMS = {
   easeIn: 0.5, easeOut: 0.5,
 }
 
+function validateParams(params, dpi) {
+  if (!dpi || dpi < 1) return 'DPI must be ≥ 1'
+  if (!params.rowSpacingPx || params.rowSpacingPx < 1) return 'Row spacing must be ≥ 1 px'
+  if (!params.colSpacingPx || params.colSpacingPx < 1) return 'Col spacing must be ≥ 1 px'
+  if (!params.innerRadius || params.innerRadius < 1) return 'Inner radius must be ≥ 1 mm'
+  if (!params.outerRadius || params.outerRadius <= params.innerRadius)
+    return 'Outer radius must be > inner radius'
+  if (!params.transitionDistanceMm || params.transitionDistanceMm <= 0)
+    return 'Transition distance must be > 0'
+  return null
+}
+
 export default function App() {
   const [image, setImage] = useState(null)
   const [dpi, setDpi] = useState(96)
@@ -32,8 +44,10 @@ export default function App() {
     parseDpi(image.file).then(detectedDpi => setDpi(detectedDpi))
   }, [image])
 
+  const validationError = image ? validateParams(params, dpi) : null
+
   const samples = useMemo(() => {
-    if (!image) return null
+    if (!image || validationError) return null
     return sampleImage(image.imageData, {
       rowSpacingPx: params.rowSpacingPx,
       colSpacingPx: params.colSpacingPx,
@@ -71,6 +85,13 @@ export default function App() {
         </p>
       )}
       {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} setDpi={setDpi} />}
+      {image && (
+        <div style={{ height: 24, display: 'flex', alignItems: 'center' }}>
+          {validationError && (
+            <span style={{ color: 'crimson', fontSize: 12 }}>⚠ {validationError}</span>
+          )}
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 300 }}>
           <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
