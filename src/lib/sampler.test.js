@@ -121,4 +121,25 @@ describe('sampleImage - dither mode', () => {
     const withDitherFalse = sampleImage(imageData, { ...base, dither: false })
     expect(withDitherFalse).toEqual(withoutDither)
   })
+
+  it('produces different output than plain threshold on mid-gray image', () => {
+    // Mid-gray image: luminance ~0.502, just above threshold 0.5
+    // Without dither: every sample is false (0.502 >= 0.5 → not black)
+    // With dither: first pixel rounds to 1 (white, false), error ≈ -0.498 diffuses forward,
+    //   next pixel gets lower accumulated value → rounds to 0 (black, true)
+    //   So the result should contain at least one true value
+    const imageData = makeImageData(10, 10, () => [128, 128, 128, 255])
+    const base = {
+      rowSpacingPx: 5, colSpacingPx: 5,
+      mode: 'exact', threshold: 0.5, blackIsOuter: true,
+      convW: 1, convH: 1,
+    }
+    const withoutDither = sampleImage(imageData, base)
+    const withDither = sampleImage(imageData, { ...base, dither: true })
+    // Without dither: all false (mid-gray above threshold)
+    withoutDither.forEach(row => row.forEach(cell => expect(cell).toBe(false)))
+    // With dither: should differ — at least one true due to error diffusion
+    const allFalse = withDither.flat().every(v => v === false)
+    expect(allFalse).toBe(false)
+  })
 })

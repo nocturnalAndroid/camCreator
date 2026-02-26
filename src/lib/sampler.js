@@ -38,6 +38,7 @@ export function sampleImage(imageData, params) {
 }
 
 function sampleWithDither(imageData, params) {
+  // Precondition: rowSpacingPx > 0 and colSpacingPx > 0 (guaranteed by sampleImage guard)
   const { data, width, height } = imageData
   const { rowSpacingPx, colSpacingPx, mode, threshold, blackIsOuter, convW, convH } = params
 
