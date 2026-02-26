@@ -22,49 +22,33 @@ export default function PatternSkeleton({ image, samples, params, dpi }) {
 
     const rowPx = toPixels(params.rowSpacing, params.rowUnit)
     const colPx = toPixels(params.colSpacing, params.colUnit)
-    const dotR = Math.max(2, colPx * 0.25)
+    const ext = colPx * 0.5  // extension beyond the first/last true sample
 
-    ctx.fillStyle = 'black'
     ctx.strokeStyle = 'black'
     ctx.lineWidth = Math.max(1.5, colPx * 0.1)
+
+    const drawRun = (startIdx, endIdx, y) => {
+      ctx.beginPath()
+      ctx.moveTo(startIdx * colPx - ext, y)
+      ctx.lineTo(endIdx * colPx + ext, y)
+      ctx.stroke()
+    }
 
     samples.forEach((row, ri) => {
       const y = ri * rowPx
       let runStart = null
 
       row.forEach((val, ci) => {
-        const x = ci * colPx
         if (val && runStart === null) {
           runStart = ci
         } else if (!val && runStart !== null) {
-          const runLength = ci - runStart
-          if (runLength === 1) {
-            ctx.beginPath()
-            ctx.arc(runStart * colPx, y, dotR, 0, Math.PI * 2)
-            ctx.fill()
-          } else {
-            ctx.beginPath()
-            ctx.moveTo(runStart * colPx, y)
-            ctx.lineTo((ci - 1) * colPx, y)
-            ctx.stroke()
-          }
+          drawRun(runStart, ci - 1, y)
           runStart = null
         }
       })
 
       if (runStart !== null) {
-        const lastIdx = row.length - 1
-        const runLength = lastIdx - runStart + 1
-        if (runLength === 1) {
-          ctx.beginPath()
-          ctx.arc(runStart * colPx, y, dotR, 0, Math.PI * 2)
-          ctx.fill()
-        } else {
-          ctx.beginPath()
-          ctx.moveTo(runStart * colPx, y)
-          ctx.lineTo(lastIdx * colPx, y)
-          ctx.stroke()
-        }
+        drawRun(runStart, row.length - 1, y)
       }
     })
   }, [image, samples, params, dpi])
