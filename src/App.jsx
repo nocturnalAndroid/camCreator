@@ -20,6 +20,7 @@ const DEFAULT_PARAMS = {
   threshold: 0.5,
   blackIsOuter: true,
   easeIn: 0.5, easeOut: 0.5,
+  dither: false,
 }
 
 function validateParams(params, dpi) {
@@ -56,6 +57,7 @@ export default function App() {
       blackIsOuter: params.blackIsOuter,
       convW: params.convAutoSize ? Math.max(1, Math.round(params.colSpacingPx)) : params.convW,
       convH: params.convAutoSize ? Math.max(1, Math.round(params.rowSpacingPx)) : params.convH,
+      dither: params.dither,
     })
   }, [image, params, dpi])
 
