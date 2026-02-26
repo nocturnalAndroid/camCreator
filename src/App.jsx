@@ -4,6 +4,7 @@ import ParameterPanel from './components/ParameterPanel'
 import ImagePreview from './components/ImagePreview'
 import PatternSkeleton from './components/PatternSkeleton'
 import CamGrid from './components/CamGrid'
+import DownloadPanel from './components/DownloadPanel'
 import { buildCamProfile } from './lib/camGeometry'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
 import { sampleImage } from './lib/sampler'
@@ -79,6 +80,7 @@ export default function App() {
       <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
       <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
       <CamGrid profiles={profiles} params={params} />
+      <DownloadPanel profiles={profiles} params={params} />
     </div>
   )
 }
