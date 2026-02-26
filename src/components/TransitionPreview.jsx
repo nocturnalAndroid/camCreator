@@ -29,11 +29,11 @@ export default function TransitionPreview({ params, image }) {
   const path = profileToSvgPath(profile)
   const ro = params.outerRadius
   const ri = params.innerRadius
-  const sw = ro * 0.015
 
   // Full-circle view (no image loaded)
   if (showAngleDeg >= 359.9) {
     const v = ro * 1.25
+    const sw = ro * 0.015
     return (
       <div>
         <h3>Transition preview · F·F·T·T·F·T·F·F·T·F</h3>
@@ -64,6 +64,7 @@ export default function TransitionPreview({ params, image }) {
   const vy = Math.min(...ys) - pad
   const vw = Math.max(...xs) - Math.min(...xs) + 2 * pad
   const vh = Math.max(...ys) - Math.min(...ys) + 2 * pad
+  const sw = Math.min(vw, vh) * 0.008
 
   const clipR = ro * 2
   const largeArc = showAngleDeg > 180 ? 1 : 0
