@@ -15,6 +15,7 @@
 export function sampleImage(imageData, params) {
   const { data, width, height } = imageData
   const { rowSpacingPx, colSpacingPx, mode, threshold, blackIsOuter, convW, convH } = params
+  if (!rowSpacingPx || rowSpacingPx <= 0 || !colSpacingPx || colSpacingPx <= 0) return []
 
   const rows = []
   for (let y = 0; y < height; y += rowSpacingPx) {
