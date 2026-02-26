@@ -85,7 +85,19 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
       {/* Sampling mode */}
       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         Sampling
-        <select value={params.mode} onChange={e => setParams(p => ({ ...p, mode: e.target.value }))}>
+        <select value={params.mode} onChange={e => {
+          const mode = e.target.value
+          if (mode === 'convolution') {
+            setParams(p => ({
+              ...p, mode,
+              convAutoSize: true,
+              convW: Math.max(1, Math.round(p.colSpacingPx)),
+              convH: Math.max(1, Math.round(p.rowSpacingPx)),
+            }))
+          } else {
+            setParams(p => ({ ...p, mode }))
+          }
+        }}>
           <option value="exact">Exact pixel</option>
           <option value="convolution">Convolution</option>
         </select>
@@ -93,20 +105,32 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
 
       {params.mode === 'convolution' && <>
         <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          Conv width (px)
-          <input {...inp} min={1} value={params.convW}
-            onChange={e => setParams(p => ({ ...p, convW: +e.target.value }))} />
-          <button onClick={() => setParams(p => ({ ...p, convW: Math.max(1, Math.round(p.colSpacingPx)) }))}>
-            Set to cover
-          </button>
+          <input type="checkbox" checked={params.convAutoSize}
+            onChange={e => {
+              if (e.target.checked) {
+                setParams(p => ({
+                  ...p,
+                  convAutoSize: true,
+                  convW: Math.max(1, Math.round(p.colSpacingPx)),
+                  convH: Math.max(1, Math.round(p.rowSpacingPx)),
+                }))
+              } else {
+                setParams(p => ({ ...p, convAutoSize: false }))
+              }
+            }} />
+          Set conv to cover
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          Conv height (px)
-          <input {...inp} min={1} value={params.convH}
-            onChange={e => setParams(p => ({ ...p, convH: +e.target.value }))} />
-          <button onClick={() => setParams(p => ({ ...p, convH: Math.max(1, Math.round(p.rowSpacingPx)) }))}>
-            Set to cover
-          </button>
+          Conv W (px)
+          <input {...inp} min={1}
+            value={params.convAutoSize ? Math.max(1, Math.round(params.colSpacingPx)) : params.convW}
+            onChange={e => setParams(p => ({ ...p, convW: +e.target.value, convAutoSize: false }))} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          Conv H (px)
+          <input {...inp} min={1}
+            value={params.convAutoSize ? Math.max(1, Math.round(params.rowSpacingPx)) : params.convH}
+            onChange={e => setParams(p => ({ ...p, convH: +e.target.value, convAutoSize: false }))} />
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           Threshold

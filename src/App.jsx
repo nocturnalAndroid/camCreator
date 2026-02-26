@@ -15,7 +15,7 @@ const DEFAULT_PARAMS = {
   transitionDistanceMm: 9.42,
   innerRadius: 95, outerRadius: 100,
   mode: 'exact',
-  convW: 20, convH: 50,
+  convW: 20, convH: 50, convAutoSize: true,
   threshold: 0.5,
   blackIsOuter: true,
   easeIn: 0.5, easeOut: 0.5,
@@ -39,8 +39,8 @@ export default function App() {
       mode: params.mode,
       threshold: params.threshold,
       blackIsOuter: params.blackIsOuter,
-      convW: params.convW,
-      convH: params.convH,
+      convW: params.convAutoSize ? Math.max(1, Math.round(params.colSpacingPx)) : params.convW,
+      convH: params.convAutoSize ? Math.max(1, Math.round(params.rowSpacingPx)) : params.convH,
     })
   }, [image, params, dpi])
 
