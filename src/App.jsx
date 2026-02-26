@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react'
 import ImageUpload from './components/ImageUpload'
+import ParameterPanel from './components/ParameterPanel'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
+
+const DEFAULT_PARAMS = {
+  rowSpacing: 50, rowUnit: 'px',
+  colSpacing: 20, colUnit: 'px',
+  transitionAngleDeg: 18,
+  innerRadius: 20, outerRadius: 30,
+  mode: 'exact',
+  convW: 20, convH: 50,
+  threshold: 0.5,
+  blackIsOuter: true,
+  easeIn: 0.5, easeOut: 0.5,
+}
 
 export default function App() {
   const [image, setImage] = useState(null)
   const [dpi, setDpi] = useState(96)
+  const [params, setParams] = useState(DEFAULT_PARAMS)
 
   useEffect(() => {
     if (!image) return
@@ -25,6 +39,7 @@ export default function App() {
           &nbsp;({image.width} × {image.height}px)
         </p>
       )}
+      {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
     </div>
   )
 }
