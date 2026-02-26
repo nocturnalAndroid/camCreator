@@ -70,18 +70,6 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
           onChange={e => handleTransDist(+e.target.value)} />
       </label>
 
-      {/* Radii */}
-      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        Inner radius (mm)
-        <input {...inp} min={1} value={params.innerRadius}
-          onChange={e => setParams(p => ({ ...p, innerRadius: +e.target.value }))} />
-      </label>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        Outer radius (mm)
-        <input {...inp} min={1} value={params.outerRadius}
-          onChange={e => setParams(p => ({ ...p, outerRadius: +e.target.value }))} />
-      </label>
-
       {/* Sampling mode */}
       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         Sampling
@@ -147,19 +135,6 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
         Black = outer radius
       </label>
 
-      {/* Ease tensions */}
-      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        Ease-in
-        <input type="range" min={0} max={1} step={0.01} value={params.easeIn}
-          onChange={e => setParams(p => ({ ...p, easeIn: +e.target.value }))} />
-        {params.easeIn}
-      </label>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        Ease-out
-        <input type="range" min={0} max={1} step={0.01} value={params.easeOut}
-          onChange={e => setParams(p => ({ ...p, easeOut: +e.target.value }))} />
-        {params.easeOut}
-      </label>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import ImagePreview from './components/ImagePreview'
 import PatternSkeleton from './components/PatternSkeleton'
 import CamGrid from './components/CamGrid'
 import DownloadPanel from './components/DownloadPanel'
+import TransitionPreview from './components/TransitionPreview'
 import { buildCamProfile } from './lib/camGeometry'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
 import { sampleImage } from './lib/sampler'
@@ -78,6 +79,32 @@ export default function App() {
           <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
         </div>
       </div>
+      {/* Radii + ease controls */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, margin: '16px 0', alignItems: 'center' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+          Inner radius (mm)
+          <input type="number" min={1} value={params.innerRadius} style={{ width: 58 }}
+            onChange={e => setParams(p => ({ ...p, innerRadius: +e.target.value }))} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+          Outer radius (mm)
+          <input type="number" min={1} value={params.outerRadius} style={{ width: 58 }}
+            onChange={e => setParams(p => ({ ...p, outerRadius: +e.target.value }))} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+          Ease-in
+          <input type="range" min={0} max={1} step={0.01} value={params.easeIn}
+            onChange={e => setParams(p => ({ ...p, easeIn: +e.target.value }))} />
+          {params.easeIn}
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+          Ease-out
+          <input type="range" min={0} max={1} step={0.01} value={params.easeOut}
+            onChange={e => setParams(p => ({ ...p, easeOut: +e.target.value }))} />
+          {params.easeOut}
+        </label>
+      </div>
+      <TransitionPreview params={params} image={image} />
       <CamGrid profiles={profiles} params={params} />
       <DownloadPanel profiles={profiles} params={params} />
     </div>
