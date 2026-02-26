@@ -3,6 +3,8 @@ import ImageUpload from './components/ImageUpload'
 import ParameterPanel from './components/ParameterPanel'
 import ImagePreview from './components/ImagePreview'
 import PatternSkeleton from './components/PatternSkeleton'
+import CamGrid from './components/CamGrid'
+import { buildCamProfile } from './lib/camGeometry'
 import { parseDpi, imageSizeCm } from './lib/imageMeta'
 import { sampleImage } from './lib/sampler'
 
@@ -48,6 +50,19 @@ export default function App() {
     })
   }, [image, params, dpi])
 
+  const profiles = useMemo(() => {
+    if (!samples) return null
+    return samples.map(row =>
+      buildCamProfile(row, {
+        innerRadius: params.innerRadius,
+        outerRadius: params.outerRadius,
+        transitionAngleDeg: params.transitionAngleDeg,
+        easeIn: params.easeIn,
+        easeOut: params.easeOut,
+      })
+    )
+  }, [samples, params])
+
   const sizeCm = image ? imageSizeCm(image.width, image.height, dpi) : null
 
   return (
@@ -63,6 +78,7 @@ export default function App() {
       {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
       <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
       <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
+      <CamGrid profiles={profiles} params={params} />
     </div>
   )
 }
