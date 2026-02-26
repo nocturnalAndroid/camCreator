@@ -120,12 +120,6 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
             value={params.convAutoSize ? Math.max(1, Math.round(params.rowSpacingPx)) : params.convH}
             onChange={e => setParams(p => ({ ...p, convH: +e.target.value, convAutoSize: false }))} />
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          Threshold
-          <input type="range" min={0} max={1} step={0.01} value={params.threshold}
-            onChange={e => setParams(p => ({ ...p, threshold: +e.target.value }))} />
-          {params.threshold}
-        </label>
       </>}
 
       {/* Dither */}
@@ -134,6 +128,13 @@ export default function ParameterPanel({ params, setParams, image, dpi, setDpi }
           onChange={e => setParams(p => ({ ...p, dither: e.target.checked }))} />
         Dither (Floyd–Steinberg)
       </label>
+
+      {(params.mode === 'convolution' || params.dither) && <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Threshold
+        <input type="range" min={0} max={1} step={0.01} value={params.threshold}
+          onChange={e => setParams(p => ({ ...p, threshold: +e.target.value }))} />
+        {params.threshold}
+      </label>}
 
       {/* Black = outer */}
       <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
