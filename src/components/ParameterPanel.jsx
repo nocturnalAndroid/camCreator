@@ -12,20 +12,22 @@ export default function ParameterPanel({ params, setParams, image, dpi }) {
 
   function handleColSpacing(value, unit) {
     const colPx = toPixels(value, unit, dpi)
-    const transAngle = imageWidthPx > 0 && colPx > 0
+    const transAngleDeg = imageWidthPx > 0 && colPx > 0
       ? 360 / (imageWidthPx / colPx)
-      : params.transitionAngleDeg
-    setParams(p => ({ ...p, colSpacing: value, colUnit: unit, transitionAngleDeg: +transAngle.toFixed(2) }))
+      : (params.transitionDistanceMm / params.outerRadius) * (180 / Math.PI)
+    const transDistMm = params.outerRadius * transAngleDeg * Math.PI / 180
+    setParams(p => ({ ...p, colSpacing: value, colUnit: unit, transitionDistanceMm: +transDistMm.toFixed(2) }))
   }
 
-  function handleTransAngle(value) {
-    const colPx = imageWidthPx > 0 && value > 0
-      ? imageWidthPx / (360 / value)
+  function handleTransDist(value) {
+    const transAngleDeg = params.outerRadius > 0 ? (value / params.outerRadius) * (180 / Math.PI) : 0
+    const colPx = imageWidthPx > 0 && transAngleDeg > 0
+      ? imageWidthPx / (360 / transAngleDeg)
       : toPixels(params.colSpacing, params.colUnit, dpi)
     const colInUnit = params.colUnit === 'px' ? colPx
       : params.colUnit === 'cm' ? (colPx / dpi) * 2.54
       : colPx / dpi
-    setParams(p => ({ ...p, transitionAngleDeg: +value, colSpacing: +colInUnit.toFixed(3) }))
+    setParams(p => ({ ...p, transitionDistanceMm: +value, colSpacing: +colInUnit.toFixed(3) }))
   }
 
   const colPx = toPixels(params.colSpacing, params.colUnit, dpi)
@@ -54,9 +56,9 @@ export default function ParameterPanel({ params, setParams, image, dpi }) {
       </label>
       <span style={{ alignSelf: 'center' }}>⇔</span>
       <label>
-        Transition angle (°)&nbsp;
-        <input type="number" min={0.1} step={0.1} value={params.transitionAngleDeg}
-          onChange={e => handleTransAngle(+e.target.value)} style={{ width: 70 }} />
+        Transition dist (mm)&nbsp;
+        <input type="number" min={0.1} step={0.1} value={params.transitionDistanceMm}
+          onChange={e => handleTransDist(+e.target.value)} style={{ width: 70 }} />
       </label>
 
       <label>

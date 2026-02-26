@@ -12,7 +12,7 @@ import { sampleImage } from './lib/sampler'
 const DEFAULT_PARAMS = {
   rowSpacing: 50, rowUnit: 'px',
   colSpacing: 20, colUnit: 'px',
-  transitionAngleDeg: 18,
+  transitionDistanceMm: 9.42,
   innerRadius: 20, outerRadius: 30,
   mode: 'exact',
   convW: 20, convH: 50,
@@ -57,7 +57,7 @@ export default function App() {
       buildCamProfile(row, {
         innerRadius: params.innerRadius,
         outerRadius: params.outerRadius,
-        transitionAngleDeg: params.transitionAngleDeg,
+        transitionAngleDeg: (params.transitionDistanceMm / params.outerRadius) * (180 / Math.PI),
         easeIn: params.easeIn,
         easeOut: params.easeOut,
       })
