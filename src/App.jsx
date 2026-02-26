@@ -77,8 +77,14 @@ export default function App() {
         </p>
       )}
       {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
-      <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
-      <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 300 }}>
+          <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />
+        </div>
+        <div style={{ flex: 1, minWidth: 300 }}>
+          <PatternSkeleton image={image} samples={samples} params={params} dpi={dpi} />
+        </div>
+      </div>
       <CamGrid profiles={profiles} params={params} />
       <DownloadPanel profiles={profiles} params={params} />
     </div>
