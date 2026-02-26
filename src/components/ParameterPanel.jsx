@@ -1,79 +1,90 @@
-const UNITS = ['px', 'cm', 'in']
-
-function toPixels(value, unit, dpi) {
-  if (unit === 'px') return value
-  if (unit === 'cm') return (value / 2.54) * dpi
-  if (unit === 'in') return value * dpi
-  return value
-}
-
-export default function ParameterPanel({ params, setParams, image, dpi }) {
+export default function ParameterPanel({ params, setParams, image, dpi, setDpi }) {
   const imageWidthPx = image?.width ?? 0
 
-  function handleColSpacing(value, unit) {
-    const colPx = toPixels(value, unit, dpi)
-    const transAngleDeg = imageWidthPx > 0 && colPx > 0
-      ? 360 / (imageWidthPx / colPx)
+  function handleColSpacingPx(px) {
+    const transAngleDeg = imageWidthPx > 0 && px > 0
+      ? 360 / (imageWidthPx / px)
       : (params.transitionDistanceMm / params.outerRadius) * (180 / Math.PI)
     const transDistMm = params.outerRadius * transAngleDeg * Math.PI / 180
-    setParams(p => ({ ...p, colSpacing: value, colUnit: unit, transitionDistanceMm: +transDistMm.toFixed(2) }))
+    setParams(p => ({ ...p, colSpacingPx: +parseFloat(px).toFixed(2), transitionDistanceMm: +transDistMm.toFixed(2) }))
   }
 
   function handleTransDist(value) {
     const transAngleDeg = params.outerRadius > 0 ? (value / params.outerRadius) * (180 / Math.PI) : 0
     const colPx = imageWidthPx > 0 && transAngleDeg > 0
       ? imageWidthPx / (360 / transAngleDeg)
-      : toPixels(params.colSpacing, params.colUnit, dpi)
-    const colInUnit = params.colUnit === 'px' ? colPx
-      : params.colUnit === 'cm' ? (colPx / dpi) * 2.54
-      : colPx / dpi
-    setParams(p => ({ ...p, transitionDistanceMm: +value, colSpacing: +colInUnit.toFixed(3) }))
+      : params.colSpacingPx
+    setParams(p => ({ ...p, transitionDistanceMm: +value, colSpacingPx: +parseFloat(colPx).toFixed(2) }))
   }
 
-  const colPx = toPixels(params.colSpacing, params.colUnit, dpi)
-  const rowPx = toPixels(params.rowSpacing, params.rowUnit, dpi)
+  const rowCm = (params.rowSpacingPx / dpi * 2.54).toFixed(2)
+  const rowIn = (params.rowSpacingPx / dpi).toFixed(3)
+  const colCm = (params.colSpacingPx / dpi * 2.54).toFixed(2)
+  const colIn = (params.colSpacingPx / dpi).toFixed(3)
+
+  const inp = { type: 'number', style: { width: 58 } }
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
-      <label>
-        Row spacing&nbsp;
-        <input type="number" min={1} value={params.rowSpacing}
-          onChange={e => setParams(p => ({ ...p, rowSpacing: +e.target.value }))} style={{ width: 70 }} />
-        <select value={params.rowUnit}
-          onChange={e => setParams(p => ({ ...p, rowUnit: e.target.value }))}>
-          {UNITS.map(u => <option key={u}>{u}</option>)}
-        </select>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 16, alignItems: 'center' }}>
+
+      {/* DPI */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        DPI
+        <input {...inp} min={1} step={1} value={dpi}
+          onChange={e => setDpi(+e.target.value)} />
       </label>
 
-      <label>
-        Col spacing&nbsp;
-        <input type="number" min={0.1} step={0.1} value={params.colSpacing}
-          onChange={e => handleColSpacing(+e.target.value, params.colUnit)} style={{ width: 70 }} />
-        <select value={params.colUnit}
-          onChange={e => handleColSpacing(params.colSpacing, e.target.value)}>
-          {UNITS.map(u => <option key={u}>{u}</option>)}
-        </select>
-      </label>
+      <span style={{ color: '#ccc' }}>|</span>
+
+      {/* Row spacing */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span>Row spacing</span>
+        <input {...inp} min={1} step={1} value={Math.round(params.rowSpacingPx)}
+          onChange={e => setParams(p => ({ ...p, rowSpacingPx: +e.target.value }))} />
+        <span>px</span>
+        <input {...inp} min={0.01} step={0.01} value={rowCm}
+          onChange={e => setParams(p => ({ ...p, rowSpacingPx: +(+e.target.value / 2.54 * dpi).toFixed(2) }))} />
+        <span>cm</span>
+        <input {...inp} min={0.001} step={0.001} value={rowIn}
+          onChange={e => setParams(p => ({ ...p, rowSpacingPx: +(+e.target.value * dpi).toFixed(2) }))} />
+        <span>in</span>
+      </div>
+
+      {/* Col spacing ↔ transition distance */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span>Col spacing</span>
+        <input {...inp} min={1} step={1} value={Math.round(params.colSpacingPx)}
+          onChange={e => handleColSpacingPx(+e.target.value)} />
+        <span>px</span>
+        <input {...inp} min={0.01} step={0.01} value={colCm}
+          onChange={e => handleColSpacingPx(+(+e.target.value / 2.54 * dpi).toFixed(2))} />
+        <span>cm</span>
+        <input {...inp} min={0.001} step={0.001} value={colIn}
+          onChange={e => handleColSpacingPx(+(+e.target.value * dpi).toFixed(2))} />
+        <span>in</span>
+      </div>
       <span style={{ alignSelf: 'center' }}>⇔</span>
-      <label>
-        Transition dist (mm)&nbsp;
-        <input type="number" min={0.1} step={0.1} value={params.transitionDistanceMm}
-          onChange={e => handleTransDist(+e.target.value)} style={{ width: 70 }} />
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Transition dist (mm)
+        <input {...inp} min={0.1} step={0.1} value={params.transitionDistanceMm}
+          onChange={e => handleTransDist(+e.target.value)} />
       </label>
 
-      <label>
-        Inner radius (mm)&nbsp;
-        <input type="number" min={1} value={params.innerRadius}
-          onChange={e => setParams(p => ({ ...p, innerRadius: +e.target.value }))} style={{ width: 70 }} />
+      {/* Radii */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Inner radius (mm)
+        <input {...inp} min={1} value={params.innerRadius}
+          onChange={e => setParams(p => ({ ...p, innerRadius: +e.target.value }))} />
       </label>
-      <label>
-        Outer radius (mm)&nbsp;
-        <input type="number" min={1} value={params.outerRadius}
-          onChange={e => setParams(p => ({ ...p, outerRadius: +e.target.value }))} style={{ width: 70 }} />
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Outer radius (mm)
+        <input {...inp} min={1} value={params.outerRadius}
+          onChange={e => setParams(p => ({ ...p, outerRadius: +e.target.value }))} />
       </label>
 
-      <label>
-        Sampling&nbsp;
+      {/* Sampling mode */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Sampling
         <select value={params.mode} onChange={e => setParams(p => ({ ...p, mode: e.target.value }))}>
           <option value="exact">Exact pixel</option>
           <option value="convolution">Convolution</option>
@@ -81,47 +92,49 @@ export default function ParameterPanel({ params, setParams, image, dpi }) {
       </label>
 
       {params.mode === 'convolution' && <>
-        <label>
-          Conv width (px)&nbsp;
-          <input type="number" min={1} value={params.convW}
-            onChange={e => setParams(p => ({ ...p, convW: +e.target.value }))} style={{ width: 60 }} />
-          <button onClick={() => setParams(p => ({ ...p, convW: Math.max(1, Math.round(colPx)) }))}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          Conv width (px)
+          <input {...inp} min={1} value={params.convW}
+            onChange={e => setParams(p => ({ ...p, convW: +e.target.value }))} />
+          <button onClick={() => setParams(p => ({ ...p, convW: Math.max(1, Math.round(p.colSpacingPx)) }))}>
             Set to cover
           </button>
         </label>
-        <label>
-          Conv height (px)&nbsp;
-          <input type="number" min={1} value={params.convH}
-            onChange={e => setParams(p => ({ ...p, convH: +e.target.value }))} style={{ width: 60 }} />
-          <button onClick={() => setParams(p => ({ ...p, convH: Math.max(1, Math.round(rowPx)) }))}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          Conv height (px)
+          <input {...inp} min={1} value={params.convH}
+            onChange={e => setParams(p => ({ ...p, convH: +e.target.value }))} />
+          <button onClick={() => setParams(p => ({ ...p, convH: Math.max(1, Math.round(p.rowSpacingPx)) }))}>
             Set to cover
           </button>
         </label>
-        <label>
-          Threshold&nbsp;
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          Threshold
           <input type="range" min={0} max={1} step={0.01} value={params.threshold}
             onChange={e => setParams(p => ({ ...p, threshold: +e.target.value }))} />
-          &nbsp;{params.threshold}
+          {params.threshold}
         </label>
       </>}
 
-      <label>
+      {/* Black = outer */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         <input type="checkbox" checked={params.blackIsOuter}
           onChange={e => setParams(p => ({ ...p, blackIsOuter: e.target.checked }))} />
-        &nbsp;Black = outer radius
+        Black = outer radius
       </label>
 
-      <label>
-        Ease-in tension&nbsp;
+      {/* Ease tensions */}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Ease-in
         <input type="range" min={0} max={1} step={0.01} value={params.easeIn}
           onChange={e => setParams(p => ({ ...p, easeIn: +e.target.value }))} />
-        &nbsp;{params.easeIn}
+        {params.easeIn}
       </label>
-      <label>
-        Ease-out tension&nbsp;
+      <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        Ease-out
         <input type="range" min={0} max={1} step={0.01} value={params.easeOut}
           onChange={e => setParams(p => ({ ...p, easeOut: +e.target.value }))} />
-        &nbsp;{params.easeOut}
+        {params.easeOut}
       </label>
     </div>
   )

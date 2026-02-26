@@ -10,10 +10,10 @@ import { parseDpi, imageSizeCm } from './lib/imageMeta'
 import { sampleImage } from './lib/sampler'
 
 const DEFAULT_PARAMS = {
-  rowSpacing: 50, rowUnit: 'px',
-  colSpacing: 20, colUnit: 'px',
+  rowSpacingPx: 50,
+  colSpacingPx: 20,
   transitionDistanceMm: 9.42,
-  innerRadius: 20, outerRadius: 30,
+  innerRadius: 95, outerRadius: 100,
   mode: 'exact',
   convW: 20, convH: 50,
   threshold: 0.5,
@@ -31,18 +31,11 @@ export default function App() {
     parseDpi(image.file).then(detectedDpi => setDpi(detectedDpi))
   }, [image])
 
-  function toPixels(value, unit) {
-    if (unit === 'px') return value
-    if (unit === 'cm') return (value / 2.54) * dpi
-    if (unit === 'in') return value * dpi
-    return value
-  }
-
   const samples = useMemo(() => {
     if (!image) return null
     return sampleImage(image.imageData, {
-      rowSpacingPx: toPixels(params.rowSpacing, params.rowUnit),
-      colSpacingPx: toPixels(params.colSpacing, params.colUnit),
+      rowSpacingPx: params.rowSpacingPx,
+      colSpacingPx: params.colSpacingPx,
       mode: params.mode,
       threshold: params.threshold,
       blackIsOuter: params.blackIsOuter,
@@ -76,7 +69,7 @@ export default function App() {
           &nbsp;({image.width} × {image.height}px)
         </p>
       )}
-      {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} />}
+      {image && <ParameterPanel params={params} setParams={setParams} image={image} dpi={dpi} setDpi={setDpi} />}
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 300 }}>
           <ImagePreview image={image} samples={samples} params={params} dpi={dpi} />

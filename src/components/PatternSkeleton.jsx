@@ -3,13 +3,6 @@ import { useEffect, useRef } from 'react'
 export default function PatternSkeleton({ image, samples, params, dpi }) {
   const canvasRef = useRef()
 
-  function toPixels(value, unit) {
-    if (unit === 'px') return value
-    if (unit === 'cm') return (value / 2.54) * dpi
-    if (unit === 'in') return value * dpi
-    return value
-  }
-
   useEffect(() => {
     if (!image || !samples || !canvasRef.current) return
     const canvas = canvasRef.current
@@ -20,8 +13,8 @@ export default function PatternSkeleton({ image, samples, params, dpi }) {
     ctx.fillStyle = 'white'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    const rowPx = toPixels(params.rowSpacing, params.rowUnit)
-    const colPx = toPixels(params.colSpacing, params.colUnit)
+    const rowPx = params.rowSpacingPx
+    const colPx = params.colSpacingPx
     const ext = colPx * 0.5  // extension beyond the first/last true sample
 
     ctx.strokeStyle = 'black'

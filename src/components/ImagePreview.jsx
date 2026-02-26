@@ -3,13 +3,6 @@ import { useEffect, useRef } from 'react'
 export default function ImagePreview({ image, samples, params, dpi }) {
   const canvasRef = useRef()
 
-  function toPixels(value, unit) {
-    if (unit === 'px') return value
-    if (unit === 'cm') return (value / 2.54) * dpi
-    if (unit === 'in') return value * dpi
-    return value
-  }
-
   useEffect(() => {
     if (!image || !canvasRef.current) return
     const canvas = canvasRef.current
@@ -22,8 +15,8 @@ export default function ImagePreview({ image, samples, params, dpi }) {
       ctx.drawImage(img, 0, 0)
       if (!samples) return
 
-      const rowPx = toPixels(params.rowSpacing, params.rowUnit)
-      const colPx = toPixels(params.colSpacing, params.colUnit)
+      const rowPx = params.rowSpacingPx
+      const colPx = params.colSpacingPx
       const dotR = Math.max(2, Math.min(colPx, rowPx) * 0.3)
 
       ctx.strokeStyle = 'rgba(0, 120, 255, 0.4)'
